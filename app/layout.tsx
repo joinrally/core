@@ -1,14 +1,14 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import type React from "react" // Added import for React
+import type React from "react" // Import React
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "RALLY - Earn Crypto While Driving",
-  description:
-    "Turn your daily commute into rewards with RALLY. Share your driving data passively and earn cryptocurrency while contributing to the future of transportation.",
+  title: "RALLY",
+  description: "Earn crypto while driving",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -23,3 +23,6 @@ export default function RootLayout({
   )
 }
 
+
+
+import './globals.css'
