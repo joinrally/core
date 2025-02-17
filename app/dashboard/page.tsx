@@ -18,7 +18,7 @@ export default function DashboardPage() {
             <Coins className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234 $RALLY</div>
+            <div className="text-2xl font-bold">568 $RALLY</div>
             <p className="text-xs text-white/70">+20.1% from last month</p>
           </CardContent>
         </Card>
@@ -28,7 +28,7 @@ export default function DashboardPage() {
             <Car className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234 mi</div>
+            <div className="text-2xl font-bold">702 mi</div>
             <p className="text-xs text-white/70">+10.5% from last month</p>
           </CardContent>
         </Card>

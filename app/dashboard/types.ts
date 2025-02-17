@@ -6,6 +6,7 @@ export interface Vehicle {
   year: number
   vin: string
   image: string
+  score?: Score
 }
 
 export interface VehicleMetrics {
@@ -39,13 +40,25 @@ export interface Trip {
   isActive: boolean
 }
 
+export interface TripSummary {
+  id: string
+  vehicleId: string
+  vehicle: Vehicle
+  startTime: string
+  endTime: string
+  distance: number
+  estimatedEnergyUsed: number
+  estimatedScore: number
+  estimatedRewards: number
+}
+
 export interface AggregatedMetrics {
-  totalTrips: number
-  totalDistance: number
-  totalEnergyUsed: number
-  totalRewards: number
-  averageScore: number
-  averageSpeed: number
-  averageEnergyEfficiency: number
+  totalTrips?: number
+  totalDistance?: number
+  totalEnergyUsed?: number
+  totalRewards?: number
+  averageScore?: number
+  averageSpeed?: number
+  averageEnergyEfficiency?: number
 }
 

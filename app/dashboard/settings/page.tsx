@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useTheme } from "next-themes"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"

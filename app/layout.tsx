@@ -7,8 +7,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "RALLY",
-  description: "Earn crypto while driving",
-    generator: 'v0.dev'
+  description: "Earn crypto while driving"
 }
 
 export default function RootLayout({
@@ -22,6 +21,8 @@ export default function RootLayout({
     </html>
   )
 }
+
+import "./globals.css"
 
 
 

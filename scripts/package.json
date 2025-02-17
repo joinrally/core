@@ -1,0 +1,11 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "license": "ISC",
+  "dependencies": {
+    "@noble/curves": "^1.0.0",
+    "aptos": "^1.7.2",
+    "dotenv": "^16.4.7",
+    "protobufjs": "^7.4.0"
+  }
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
@@ -11,21 +11,19 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft, ChevronRight, Trophy, Battery, Route, Coins, X, Car, Filter } from "lucide-react"
 import type { Vehicle, AggregatedMetrics } from "../types"
+import { getScoreColor } from "@/utils/scoreColor"
 
 interface VehicleOverviewProps {
   vehicles: Vehicle[]
   selectedVehicle: Vehicle | null
   onSelectVehicle: (vehicle: Vehicle) => void
-  aggregatedMetrics: AggregatedMetrics | null
 }
 
-export default function VehicleOverview({
-  vehicles,
-  selectedVehicle,
-  onSelectVehicle,
-  aggregatedMetrics,
-}: VehicleOverviewProps) {
+export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVehicle }: VehicleOverviewProps) {
   const [showFilters, setShowFilters] = useState(false)
+  const [aggregatedMetrics, setAggregatedMetrics] = useState<AggregatedMetrics | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -36,6 +34,24 @@ export default function VehicleOverview({
     year: searchParams.get("year")?.split(",") || [],
     vin: searchParams.get("vin")?.split(",") || [],
   }
+
+  useEffect(() => {
+    if (selectedVehicle) {
+      setIsLoading(true)
+      setError(null)
+      fetch(`/api/vehicles/${selectedVehicle.id}/metrics`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAggregatedMetrics(data)
+          setIsLoading(false)
+        })
+        .catch((err) => {
+          console.error("Error fetching vehicle metrics:", err)
+          setError("Failed to load vehicle metrics")
+          setIsLoading(false)
+        })
+    }
+  }, [selectedVehicle])
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
@@ -270,56 +286,93 @@ export default function VehicleOverview({
           </Button>
         </div>
       </Card>
-      {selectedVehicle && aggregatedMetrics && (
+      {selectedVehicle && (
         <Card className="p-4 lg:p-6 dark:bg-gray-800">
           <h2 className="text-xl lg:text-2xl font-gugi text-rally-coral dark:text-rally-pink mb-4">
             Vehicle Scores for {selectedVehicle.name}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Trophy className="h-5 w-5 text-rally-pink" />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-                  <p className="text-xl font-bold dark:text-white">{aggregatedMetrics.averageScore.toFixed(1)}</p>
+          {isLoading ? (
+            <div className="text-center">Loading vehicle metrics...</div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : aggregatedMetrics ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Trophy className="h-5 w-5 text-rally-pink" />
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
+                      <p className="text-xl font-bold dark:text-white">
+                        {aggregatedMetrics.averageScores?.total.toFixed(1)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Route className="h-5 w-5 text-rally-pink" />
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Total Distance</p>
+                      <p className="text-xl font-bold dark:text-white">
+                        {aggregatedMetrics.totalDistance.toFixed(0)} mi
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Battery className="h-5 w-5 text-rally-pink" />
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Energy Efficiency</p>
+                      <p className="text-xl font-bold dark:text-white">
+                        {aggregatedMetrics.averageEnergyEfficiency.toFixed(1)} Wh/mi
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Coins className="h-5 w-5 text-rally-pink" />
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Total Rewards</p>
+                      <p className="text-xl font-bold dark:text-white">
+                        {aggregatedMetrics.totalRewards.toFixed(2)} $RALLY
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        ${(aggregatedMetrics.totalRewards * 0.1).toFixed(2)} USD
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Route className="h-5 w-5 text-rally-pink" />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Distance</p>
-                  <p className="text-xl font-bold dark:text-white">{aggregatedMetrics.totalDistance.toFixed(0)} mi</p>
+              <Card className="p-6">
+                <h4 className="font-gugi text-xl text-rally-pink mb-4">Vehicle Average Scores</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div
+                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.energyScore)} bg-opacity-80`}
+                  >
+                    <p className="text-sm font-medium">Energy Efficiency</p>
+                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.energyScore)}</p>
+                  </div>
+                  <div
+                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.safetyScore)} bg-opacity-80`}
+                  >
+                    <p className="text-sm font-medium">Safety</p>
+                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.safetyScore)}</p>
+                  </div>
+                  <div
+                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.usageScore)} bg-opacity-80`}
+                  >
+                    <p className="text-sm font-medium">Usage Efficiency</p>
+                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.usageScore)}</p>
+                  </div>
                 </div>
-              </div>
+              </Card>
             </div>
-            <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Battery className="h-5 w-5 text-rally-pink" />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Energy Efficiency</p>
-                  <p className="text-xl font-bold dark:text-white">
-                    {aggregatedMetrics.averageEnergyEfficiency.toFixed(1)} Wh/mi
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Coins className="h-5 w-5 text-rally-pink" />
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Total Rewards</p>
-                  <p className="text-xl font-bold dark:text-white">
-                    {aggregatedMetrics.totalRewards.toFixed(2)} $RALLY
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    ${(aggregatedMetrics.totalRewards * 0.1).toFixed(2)} USD
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ) : (
+            <div className="text-center">No metrics available for this vehicle.</div>
+          )}
           <div className="mt-6">
             <Button onClick={handleViewTrips} className="bg-rally-coral hover:bg-rally-pink text-white">
               View Recent Trips

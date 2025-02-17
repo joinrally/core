@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server"
-import type { AggregatedMetrics } from "@/app/dashboard/types"
+import { getAggregatedMetricsForVehicle } from "@/lib/mockData"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const metrics: AggregatedMetrics = {
-    totalTrips: 42,
-    totalDistance: 1250,
-    totalEnergyUsed: 300,
-    totalRewards: 25.5,
-    averageScore: 85.5,
-    averageSpeed: 45.2,
-    averageEnergyEfficiency: 240,
+  const vehicleId = params.id
+  const aggregatedMetrics = await getAggregatedMetricsForVehicle(vehicleId)
+
+  if (!aggregatedMetrics) {
+    return NextResponse.json({ error: "No metrics found for this vehicle" }, { status: 404 })
   }
 
-  return NextResponse.json(metrics)
+  return NextResponse.json(aggregatedMetrics)
 }
 

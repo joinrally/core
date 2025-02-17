@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -12,15 +12,16 @@ import { formatDistance, formatRelative, isWithinInterval } from "date-fns"
 import { Car, Battery, Coins, X, Filter } from "lucide-react"
 import { getScoreColor } from "@/utils/scoreColor"
 import TripDetails from "./TripDetails"
-import type { Trip } from "../types"
+import type { Trip, TripSummary } from "../types"
 
 interface TripOverviewProps {
-  trips: Trip[]
+  trips: TripSummary[]
   selectedTrip: Trip | null
-  onSelectTrip: (trip: Trip) => void
+  onSelectTrip: (trip: TripSummary) => void
+  vin?: string | null
 }
 
-export default function TripOverview({ trips, selectedTrip, onSelectTrip }: TripOverviewProps) {
+export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, vin }: TripOverviewProps) {
   const [showFilters, setShowFilters] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -40,7 +41,9 @@ export default function TripOverview({ trips, selectedTrip, onSelectTrip }: Trip
     }
   }, [trips, selectedTrip, onSelectTrip])
 
-  const filteredTrips = trips.filter((trip) => {
+  const sortedTrips = [...trips].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
+
+  const filteredTrips = sortedTrips.filter((trip) => {
     const tripDate = new Date(trip.startTime)
     const startDate = filters.startDate ? new Date(filters.startDate) : null
     const endDate = filters.endDate ? new Date(filters.endDate) : null
@@ -50,54 +53,61 @@ export default function TripOverview({ trips, selectedTrip, onSelectTrip }: Trip
       (filters.make.length === 0 || (trip.vehicle && filters.make.includes(trip.vehicle.make))) &&
       (filters.model.length === 0 || (trip.vehicle && filters.model.includes(trip.vehicle.model))) &&
       (filters.year.length === 0 || (trip.vehicle && filters.year.includes(trip.vehicle.year.toString()))) &&
-      (filters.vin.length === 0 || (trip.vehicle && filters.vin.includes(trip.vehicle.vin)))
+      (filters.vin.length === 0 || (trip.vehicle && filters.vin.includes(trip.vehicle.vin))) &&
+      (!vin || (trip.vehicle && trip.vehicle.vin === vin))
     )
   })
 
-  const uniqueMakes = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.make)))
-  const uniqueModels = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.model)))
+  const uniqueMakes = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.make)))
+  const uniqueModels = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.model)))
   const uniqueYears = Array.from(
-    new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.year.toString())),
+    new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.year.toString())),
   )
-  const uniqueVins = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.vin)))
+  const uniqueVins = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.vin)))
 
-  const handleFilterChange = (filterType: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+  const handleFilterChange = useCallback(
+    (filterType: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
 
-    if (filterType === "startDate" || filterType === "endDate") {
-      params.set(filterType, value)
-    } else {
-      const currentValues = params.get(filterType)?.split(",") || []
-      if (currentValues.includes(value)) {
-        params.set(filterType, currentValues.filter((v) => v !== value).join(","))
+      if (filterType === "startDate" || filterType === "endDate") {
+        params.set(filterType, value)
       } else {
-        params.set(filterType, [...currentValues, value].join(","))
+        const currentValues = params.get(filterType)?.split(",") || []
+        if (currentValues.includes(value)) {
+          params.set(filterType, currentValues.filter((v) => v !== value).join(","))
+        } else {
+          params.set(filterType, [...currentValues, value].join(","))
+        }
       }
-    }
 
-    if (params.get(filterType) === "") {
-      params.delete(filterType)
-    }
+      if (params.get(filterType) === "") {
+        params.delete(filterType)
+      }
 
-    router.push(`/dashboard/trips?${params.toString()}`)
-  }
+      router.push(`/dashboard/trips?${params.toString()}`)
+    },
+    [searchParams, router],
+  )
 
-  const removeFilter = (filterType: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
+  const removeFilter = useCallback(
+    (filterType: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
 
-    if (filterType === "startDate" || filterType === "endDate") {
-      params.delete(filterType)
-    } else {
-      const currentValues = params.get(filterType)?.split(",") || []
-      params.set(filterType, currentValues.filter((v) => v !== value).join(","))
-    }
+      if (filterType === "startDate" || filterType === "endDate") {
+        params.delete(filterType)
+      } else {
+        const currentValues = params.get(filterType)?.split(",") || []
+        params.set(filterType, currentValues.filter((v) => v !== value).join(","))
+      }
 
-    if (params.get(filterType) === "") {
-      params.delete(filterType)
-    }
+      if (params.get(filterType) === "") {
+        params.delete(filterType)
+      }
 
-    router.push(`/dashboard/trips?${params.toString()}`)
-  }
+      router.push(`/dashboard/trips?${params.toString()}`)
+    },
+    [searchParams, router],
+  )
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
@@ -247,18 +257,13 @@ export default function TripOverview({ trips, selectedTrip, onSelectTrip }: Trip
                     <p className="text-sm text-gray-500">
                       Duration: {formatDistance(new Date(trip.startTime), new Date(trip.endTime))}
                     </p>
-                    {trip.isActive && (
-                      <span className="inline-block bg-green-500 text-white text-xs px-2 py-1 rounded mt-1">
-                        Active
-                      </span>
-                    )}
                     <p className="text-sm text-gray-500 mt-1">
                       Vehicle: {trip.vehicle ? `${trip.vehicle.make} ${trip.vehicle.model}` : "N/A"}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={`font-bold text-white px-2 py-1 rounded ${getScoreColor(trip.score.total)}`}>
-                      {trip.score.total.toFixed(1)}
+                    <p className={`font-bold text-white px-2 py-1 rounded ${getScoreColor(trip.estimatedScore)}`}>
+                      {trip.estimatedScore.toFixed(1)}
                     </p>
                     <p className="text-sm text-gray-500">Score</p>
                   </div>
@@ -270,14 +275,14 @@ export default function TripOverview({ trips, selectedTrip, onSelectTrip }: Trip
                   </div>
                   <div className="flex items-center gap-2">
                     <Battery className="h-4 w-4 text-rally-pink" />
-                    <span>{trip.energyUsed.toFixed(1)} kWh</span>
+                    <span>{trip.estimatedEnergyUsed.toFixed(1)} kWh</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Coins className="h-4 w-4 text-rally-pink" />
-                    <span>{trip.rewards.toFixed(2)} $RALLY</span>
+                    <span>{trip.estimatedRewards.toFixed(2)} $RALLY</span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">${(trip.rewards * 0.1).toFixed(2)} USD</p>
+                <p className="text-xs text-gray-500 mt-1">${(trip.estimatedRewards * 0.1).toFixed(2)} USD</p>
               </Card>
             ))}
           </div>
