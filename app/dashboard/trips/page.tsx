@@ -16,14 +16,10 @@ function TripsPageContent() {
     const fetchAllTrips = async () => {
       try {
         const response = await fetch("/api/trips")
-        if (!response.ok) {
-          throw new Error("Failed to fetch trips")
-        }
         const data = await response.json()
-        setTrips(data || [])
+        setTrips(data)
       } catch (error) {
         console.error("Error fetching trips:", error)
-        setTrips([])
       }
     }
 
@@ -40,13 +36,16 @@ function TripsPageContent() {
       setSelectedTrip(tripDetails)
     } catch (error) {
       console.error("Error fetching trip details:", error)
-      setSelectedTrip(null)
+      // Optionally, you can set an error state here to show an error message to the user
     }
   }
 
+  // Filter trips if VIN is provided
+  const filteredTrips = vin ? trips.filter((trip) => trip.vehicle?.vin === vin) : trips
+
   return (
     <div className="h-[calc(100vh-4rem)]">
-      <TripOverview trips={trips} selectedTrip={selectedTrip} onSelectTrip={handleSelectTrip} vin={vin} />
+      <TripOverview trips={filteredTrips} selectedTrip={selectedTrip} onSelectTrip={handleSelectTrip} vin={vin} />
     </div>
   )
 }

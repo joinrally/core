@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -18,10 +18,9 @@ interface TripOverviewProps {
   trips: TripSummary[]
   selectedTrip: Trip | null
   onSelectTrip: (trip: TripSummary) => void
-  vin?: string | null
 }
 
-export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, vin }: TripOverviewProps) {
+export default function TripOverview({ trips, selectedTrip, onSelectTrip }: TripOverviewProps) {
   const [showFilters, setShowFilters] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -41,8 +40,7 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
     }
   }, [trips, selectedTrip, onSelectTrip])
 
-  const sortedTrips = [...trips].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
-
+  const sortedTrips = trips.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
   const filteredTrips = sortedTrips.filter((trip) => {
     const tripDate = new Date(trip.startTime)
     const startDate = filters.startDate ? new Date(filters.startDate) : null
@@ -53,61 +51,54 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
       (filters.make.length === 0 || (trip.vehicle && filters.make.includes(trip.vehicle.make))) &&
       (filters.model.length === 0 || (trip.vehicle && filters.model.includes(trip.vehicle.model))) &&
       (filters.year.length === 0 || (trip.vehicle && filters.year.includes(trip.vehicle.year.toString()))) &&
-      (filters.vin.length === 0 || (trip.vehicle && filters.vin.includes(trip.vehicle.vin))) &&
-      (!vin || (trip.vehicle && trip.vehicle.vin === vin))
+      (filters.vin.length === 0 || (trip.vehicle && filters.vin.includes(trip.vehicle.vin)))
     )
   })
 
-  const uniqueMakes = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.make)))
-  const uniqueModels = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.model)))
+  const uniqueMakes = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.make)))
+  const uniqueModels = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.model)))
   const uniqueYears = Array.from(
-    new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.year.toString())),
+    new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.year.toString())),
   )
-  const uniqueVins = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle!.vin)))
+  const uniqueVins = Array.from(new Set(trips.filter((trip) => trip.vehicle).map((trip) => trip.vehicle.vin)))
 
-  const handleFilterChange = useCallback(
-    (filterType: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
+  const handleFilterChange = (filterType: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
 
-      if (filterType === "startDate" || filterType === "endDate") {
-        params.set(filterType, value)
-      } else {
-        const currentValues = params.get(filterType)?.split(",") || []
-        if (currentValues.includes(value)) {
-          params.set(filterType, currentValues.filter((v) => v !== value).join(","))
-        } else {
-          params.set(filterType, [...currentValues, value].join(","))
-        }
-      }
-
-      if (params.get(filterType) === "") {
-        params.delete(filterType)
-      }
-
-      router.push(`/dashboard/trips?${params.toString()}`)
-    },
-    [searchParams, router],
-  )
-
-  const removeFilter = useCallback(
-    (filterType: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-
-      if (filterType === "startDate" || filterType === "endDate") {
-        params.delete(filterType)
-      } else {
-        const currentValues = params.get(filterType)?.split(",") || []
+    if (filterType === "startDate" || filterType === "endDate") {
+      params.set(filterType, value)
+    } else {
+      const currentValues = params.get(filterType)?.split(",") || []
+      if (currentValues.includes(value)) {
         params.set(filterType, currentValues.filter((v) => v !== value).join(","))
+      } else {
+        params.set(filterType, [...currentValues, value].join(","))
       }
+    }
 
-      if (params.get(filterType) === "") {
-        params.delete(filterType)
-      }
+    if (params.get(filterType) === "") {
+      params.delete(filterType)
+    }
 
-      router.push(`/dashboard/trips?${params.toString()}`)
-    },
-    [searchParams, router],
-  )
+    router.push(`/dashboard/trips?${params.toString()}`)
+  }
+
+  const removeFilter = (filterType: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (filterType === "startDate" || filterType === "endDate") {
+      params.delete(filterType)
+    } else {
+      const currentValues = params.get(filterType)?.split(",") || []
+      params.set(filterType, currentValues.filter((v) => v !== value).join(","))
+    }
+
+    if (params.get(filterType) === "") {
+      params.delete(filterType)
+    }
+
+    router.push(`/dashboard/trips?${params.toString()}`)
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
