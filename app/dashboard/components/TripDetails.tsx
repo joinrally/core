@@ -1,15 +1,18 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import { useMemo } from "react"
-import type { Trip, VehicleMetrics } from "../types"
+import type { Trip } from "../types"
 import { Card } from "@/components/ui/card"
 import { LineChart, Line, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatDistanceToNow, formatDistance } from "date-fns"
 import { getScoreColor } from "@/utils/scoreColor"
 import { Car, Battery, Route, Coins, Clock } from "lucide-react"
 
-const TripMap = dynamic(() => import("./TripMap"), { ssr: false })
+// Commented out TripMap import
+// const TripMap = dynamic(() => import("./TripMap"), {
+//   ssr: false,
+//   loading: () => <div className="h-[400px] flex items-center justify-center bg-gray-100">Loading map...</div>,
+// })
 
 interface TripDetailsProps {
   trip: Trip
@@ -22,28 +25,9 @@ export default function TripDetails({ trip }: TripDetailsProps) {
     return formatDistance(start, end)
   }, [trip.startTime, trip.endTime])
 
-  const aggregateData = (data: VehicleMetrics[], interval: number) => {
-    const aggregated: VehicleMetrics[] = []
-    for (let i = 0; i < data.length; i += interval) {
-      const chunk = data.slice(i, i + interval)
-      const avgMetric: VehicleMetrics = {
-        timestamp: chunk[0].timestamp,
-        speed: chunk.reduce((sum, m) => sum + m.speed, 0) / chunk.length,
-        packVoltage: chunk.reduce((sum, m) => sum + m.packVoltage, 0) / chunk.length,
-        packCurrent: chunk.reduce((sum, m) => sum + m.packCurrent, 0) / chunk.length,
-        acceleration: chunk.reduce((sum, m) => sum + m.acceleration, 0) / chunk.length,
-        brakePedal: chunk.reduce((sum, m) => sum + m.brakePedal, 0) / chunk.length,
-        longitude: chunk[0].longitude,
-        latitude: chunk[0].latitude,
-      }
-      aggregated.push(avgMetric)
-    }
-    return aggregated
-  }
-
-  const aggregatedMetrics = useMemo(() => {
-    const aggregationInterval = Math.max(1, Math.floor(trip.metrics.length / 100)) // Aim for about 100 data points
-    return aggregateData(trip.metrics, aggregationInterval)
+  const aggregateData = useMemo(() => {
+    const interval = Math.max(1, Math.floor(trip.metrics.length / 100)) // Aim for about 100 data points
+    return trip.metrics.filter((_, index) => index % interval === 0)
   }, [trip.metrics])
 
   return (
@@ -121,15 +105,17 @@ export default function TripDetails({ trip }: TripDetailsProps) {
         </div>
       </Card>
 
+      {/* Commented out TripMap
       <Card className="p-6">
         <h4 className="font-gugi text-lg text-rally-coral mb-4">Trip Route</h4>
         <TripMap metrics={trip.metrics} />
       </Card>
+      */}
 
       <Card className="p-6">
         <h4 className="font-gugi text-lg text-rally-pink mb-4">Speed & Power</h4>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={aggregatedMetrics}>
+          <LineChart data={aggregateData}>
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip contentStyle={{ background: "white", border: "1px solid #ddd" }} />
             <Legend />
@@ -142,7 +128,7 @@ export default function TripDetails({ trip }: TripDetailsProps) {
       <Card className="p-6">
         <h4 className="font-gugi text-lg text-rally-pink mb-4">Acceleration & Braking</h4>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={aggregatedMetrics}>
+          <LineChart data={aggregateData}>
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip contentStyle={{ background: "white", border: "1px solid #ddd" }} />
             <Legend />

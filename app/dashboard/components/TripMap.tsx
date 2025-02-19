@@ -1,49 +1,35 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { MapContainer, TileLayer, Polyline, useMap } from "react-leaflet"
+import { useEffect, useState, useRef } from "react"
+import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
-import * as L from "leaflet"
 import type { VehicleMetrics } from "../types"
+import type { Map as LeafletMap } from "leaflet"
+
+const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
+const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false })
+const Polyline = dynamic(() => import("react-leaflet").then((mod) => mod.Polyline), { ssr: false })
 
 interface TripMapProps {
   metrics: VehicleMetrics[]
 }
 
-function MapUpdater({ positions }: { positions: [number, number][] }) {
-  const map = useMap()
-
-  useEffect(() => {
-    if (positions.length > 1) {
-      const startPoint = positions[0]
-      const endPoint = positions[positions.length - 1]
-      const bounds = L.latLngBounds([startPoint, endPoint])
-      map.fitBounds(bounds, { padding: [50, 50] })
-    }
-  }, [map, positions])
-
-  return null
-}
-
-async function getAddress(lat: number, lon: number): Promise<string> {
-  try {
-    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-    const data = await response.json()
-    const address = data.address
-    return `${address.house_number || ""} ${address.road || ""}, ${address.city || ""}, ${address.state || ""} ${address.postcode || ""}`
-  } catch (error) {
-    console.error("Error fetching address:", error)
-    return "Address not found"
-  }
-}
-
 export default function TripMap({ metrics }: TripMapProps) {
-  const mapRef = useRef<L.Map | null>(null)
+  const [mapLoaded, setMapLoaded] = useState(false)
+  const mapRef = useRef<LeafletMap | null>(null)
   const [startAddress, setStartAddress] = useState<string>("")
   const [endAddress, setEndAddress] = useState<string>("")
 
   const positions = metrics.map((metric) => [metric.latitude, metric.longitude] as [number, number])
   const center = positions[Math.floor(positions.length / 2)] || [0, 0]
+
+  useEffect(() => {
+    if (mapLoaded && mapRef.current && positions.length > 1) {
+      const map = mapRef.current
+      const bounds = positions.reduce((bounds, position) => bounds.extend(position), map.getBounds())
+      map.fitBounds(bounds, { padding: [50, 50] })
+    }
+  }, [mapLoaded, positions])
 
   useEffect(() => {
     if (positions.length > 1) {
@@ -55,16 +41,35 @@ export default function TripMap({ metrics }: TripMapProps) {
     }
   }, [positions])
 
+  async function getAddress(lat: number, lon: number): Promise<string> {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+      const data = await response.json()
+      const address = data.address
+      return `${address.house_number || ""} ${address.road || ""}, ${address.city || ""}, ${address.state || ""} ${address.postcode || ""}`
+    } catch (error) {
+      console.error("Error fetching address:", error)
+      return "Address not found"
+    }
+  }
+
   return (
     <div>
-      <MapContainer center={center} zoom={13} style={{ height: "400px", width: "100%" }} ref={mapRef}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <Polyline positions={positions} color="blue" />
-        <MapUpdater positions={positions} />
-      </MapContainer>
+      <div style={{ height: "400px", width: "100%" }}>
+        <MapContainer
+          center={center}
+          zoom={13}
+          style={{ height: "100%", width: "100%" }}
+          ref={mapRef}
+          whenReady={() => setMapLoaded(true)}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+          <Polyline positions={positions} color="blue" />
+        </MapContainer>
+      </div>
       <div className="mt-4 space-y-2 text-sm text-gray-600">
         <p>
           <strong>Start:</strong> {startAddress}
