@@ -1,150 +1,114 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-
-const slides = [
-  {
-    title: "RALLY",
-    subtitle: "Building a safer world, one mile at a time",
-  },
-  {
-    title: "Problem",
-    content: [
-      "1.3M lives lost annually to road accidents",
-      "$518B economic cost to global economy",
-      "Current approaches are punitive-only",
-      "No immediate positive reinforcement for safe driving",
-      "Drivers lack incentives for consistent good behavior",
-    ],
-  },
-  {
-    title: "Market Size",
-    content: [
-      "228M licensed drivers in US alone",
-      "$250B annual auto insurance market",
-      "$30B fleet management market",
-      "$92B global rental car market",
-      "Growing adoption of usage-based insurance",
-      "Rising insurance costs driving demand for solutions",
-    ],
-  },
-  {
-    title: "Solution",
-    content: ["Real-time rewards", "Decentralized network", "Insurance integration"],
-  },
-  {
-    title: "How It Works",
-    content: [
-      "Safety Monitoring Layer",
-      "Speed • Braking • Distance • Lane Position • Signals • Weather • Road Conditions",
-      "Intelligence Layer",
-      "AI Scoring • Pattern Recognition • Risk Assessment",
-      "Reward Layer",
-      "$RALLY Tokens • Premium Reductions • Fleet Incentives",
-    ],
-  },
-  {
-    title: "Business Model",
-    content: ["Image placeholder for business model"],
-  },
-  {
-    title: "Competitive Advantage",
-    content: [
-      "First Mover",
-      "Pioneer in on-chain driver rewards",
-      "Network Effects",
-      "More drivers = better data = stronger incentives",
-      "Real-Time Rewards",
-      "Immediate feedback and incentive distribution",
-      "Partner Ecosystem",
-      "Insurance, fleet, and charging partnerships",
-    ],
-  },
-  {
-    title: "Go-To-Market Strategy",
-    content: [
-      "Phase 1: Fleet Partnerships",
-      "Launch with fleet owners to reach existing driver pools",
-      "Phase 2: Rideshare Platform Integration",
-      "Target platforms to integrate directly with vehicles via API",
-      "Phase 3: Consumer Direct",
-      "Roll out to individual vehicle owners and drivers through in-car app marketplaces",
-    ],
-  },
-  {
-    title: "Founder",
-    content: ["Rahul Dhir", "Founder", "EV Fleet Operator & Software Engineer"],
-  },
-  {
-    title: "Roadmap",
-    content: [
-      "Q1: Tesla Integration Launch",
-      "Q2: Token Launch",
-      "Q3: Insurance Integration",
-      "Q4: Ecosystem Partnerships",
-    ],
-  },
-  {
-    title: "Funding",
-    content: [
-      "Raising $5M Seed Round",
-      "Development (40%)",
-      "Business Dev (25%)",
-      "Marketing (15%)",
-      "Operations (10%)",
-    ],
-  },
-  {
-    title: "Our Vision",
-    content: [
-      "Creating a new paradigm for road safety",
-      "Safe driving is immediately rewarded",
-      "Roads are safer for everyone",
-      "Insurance is more equitable",
-      "Communities celebrate good drivers",
-      "Technology enables better behavior",
-    ],
-  },
-]
+import Image from "next/image"
+import { useEffect, useRef, useState } from "react"
+import Reveal from "reveal.js"
+import "reveal.js/dist/reveal.css"
+import { Slide } from "./Slide"
 
 export function Deck() {
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const deckRef = useRef<Reveal | null>(null)
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length)
-  }
+  useEffect(() => {
+    const deck = new Reveal({
+      width: '100%',
+      height: '100%',
+      transition: 'fade',
+      backgroundTransition: 'fade',
+      hash: true,
+    })
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
-  }
+    deck.initialize()
+    deckRef.current = deck
+
+    return () => {
+      deckRef.current = null
+    }
+  }, [])
 
   return (
-    <div className="bg-white shadow-xl rounded-lg overflow-hidden">
-      <div className="p-8 min-h-[60vh] flex flex-col justify-center">
-        <h2 className="text-3xl font-gugi text-rally-coral mb-4">{slides[currentSlide].title}</h2>
-        {slides[currentSlide].subtitle && <p className="text-xl text-gray-600 mb-6">{slides[currentSlide].subtitle}</p>}
-        {slides[currentSlide].content && (
-          <ul className="list-disc list-inside space-y-2">
-            {slides[currentSlide].content.map((item, index) => (
-              <li key={index} className="text-lg text-gray-700">
-                {item}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="flex justify-between p-4 bg-gray-100">
-        <Button onClick={prevSlide} variant="outline" className="flex items-center">
-          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-        </Button>
-        <span className="text-gray-600">
-          {currentSlide + 1} / {slides.length}
-        </span>
-        <Button onClick={nextSlide} variant="outline" className="flex items-center">
-          Next <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
+    <div className="relative w-full h-screen bg-black">
+      <div className="reveal w-full h-full">
+        <div className="slides">
+          <Slide>
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-fZg95dfwyPZnoZhxfaYDaaT6yROPNi.png"
+              alt="RALLY Logo"
+              width={90}
+              height={90}
+            />
+            <h2 className="text-5xl">RALLY</h2>
+            <p className="text-2xl">
+              Building a safer world, one mile at a time
+            </p>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xl">Problem</h2>
+            <ul className="space-y-6">
+              <li>1.3M lives lost annually to road accidents</li>
+              <li>$518B economic cost to global economy</li>
+              <li>Current approaches are punitive-only</li>
+              <li>No immediate positive reinforcement for safe driving</li>
+              <li>Drivers lack incentives for consistent good behavior</li>
+            </ul>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Market Size</h2>
+            <ul className="space-y-6">
+              <li>228M licensed drivers in US alone</li>
+              <li>$250B annual auto insurance market</li>
+              <li>$30B fleet management market</li>
+              <li>$92B global rental car market</li>
+              <li>Growing adoption of usage-based insurance</li>
+              <li>Rising insurance costs driving demand for solutions</li>
+            </ul>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Solution</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">How It Works</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Business Model</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Competitive Advantage</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Go-to-Market Strategy</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Founder</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Roadmap</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Funding</h2>
+          </Slide>
+
+          <Slide>
+            <h2 className="text-5xlgg">Vision</h2>
+            <ul className="space-y-6">
+              <li>Safe and sustainable driving is immediately rewarded</li>
+              <li>Roads are safer for everyone</li>
+              <li>Insurance is more equitable</li>
+              <li>Communities celebrate good drivers</li>
+              <li>Technology enables better behavior</li>
+            </ul>
+          </Slide>
+        </div>
       </div>
     </div>
   )
