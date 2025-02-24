@@ -191,7 +191,6 @@ function calculateScore(metrics: VehicleMetrics[], params: TripParameters): Scor
   return {
     safetyScore,
     energyScore,
-    usageScore: efficiencyScore,
     total: totalScore,
     timestamp: new Date().toISOString(),
   }
@@ -281,8 +280,7 @@ const generateMockTrips = async () => {
     const vehicleBaseScore = seededRandom.nextInt(60, 100)
     const vehicleEnergyScore = generateRandomScore(vehicleBaseScore, 10)
     const vehicleSafetyScore = generateRandomScore(vehicleBaseScore, 10)
-    const vehicleUsageScore = generateRandomScore(vehicleBaseScore, 10)
-    const vehicleTotalScore = (vehicleEnergyScore + vehicleSafetyScore + vehicleUsageScore) / 3
+    const vehicleTotalScore = (vehicleEnergyScore + vehicleSafetyScore) / 2
 
     for (let i = 0; i < 10; i++) {
       const params = generateTripParameters()
@@ -299,8 +297,7 @@ const generateMockTrips = async () => {
         const tripBaseScore = seededRandom.nextInt(60, 100)
         const energyScore = generateRandomScore(tripBaseScore, 10)
         const safetyScore = generateRandomScore(tripBaseScore, 10)
-        const usageScore = generateRandomScore(tripBaseScore, 10)
-        const totalScore = (energyScore + safetyScore + usageScore) / 3
+        const totalScore = (energyScore + safetyScore) / 2
 
         const tripSummary: TripSummary = {
           id: `trip-${vehicle.id}-${i}`,
@@ -310,7 +307,6 @@ const generateMockTrips = async () => {
             score: {
               energyScore: vehicleEnergyScore,
               safetyScore: vehicleSafetyScore,
-              usageScore: vehicleUsageScore,
               total: vehicleTotalScore,
               timestamp: new Date().toISOString(),
             },
@@ -330,7 +326,6 @@ const generateMockTrips = async () => {
           score: {
             safetyScore,
             energyScore,
-            usageScore,
             total: totalScore,
             timestamp: new Date().toISOString(),
           },
@@ -357,15 +352,13 @@ function generateVehicleAverageScores(): { [key: string]: Score } {
     vehicleScores[vehicle.id] = {
       energyScore: Math.round(generateRandomScore(baseScore, 10)),
       safetyScore: Math.round(generateRandomScore(baseScore, 10)),
-      usageScore: Math.round(generateRandomScore(baseScore, 10)),
       total: 0,
       timestamp: new Date().toISOString(),
     }
     vehicleScores[vehicle.id].total = Math.round(
       (vehicleScores[vehicle.id].energyScore +
-        vehicleScores[vehicle.id].safetyScore +
-        vehicleScores[vehicle.id].usageScore) /
-        3,
+        vehicleScores[vehicle.id].safetyScore) /
+      3,
     )
   })
 
@@ -377,18 +370,18 @@ export const vehicleAverageScores = generateVehicleAverageScores()
 // Update the mockTrips export to use the async function
 export let mockTrips: TripWithSummary[] = []
 
-// Initialize mockTrips
-;(async () => {
-  try {
-    mockTrips = await generateMockTrips()
-    if (mockTrips.length > 0) {
-      mockTrips[0].isActive = true
+  // Initialize mockTrips
+  ; (async () => {
+    try {
+      mockTrips = await generateMockTrips()
+      if (mockTrips.length > 0) {
+        mockTrips[0].isActive = true
+      }
+      console.log(`Generated ${mockTrips.length} mock trips`)
+    } catch (error) {
+      console.error("Error generating mock trips:", error)
     }
-    console.log(`Generated ${mockTrips.length} mock trips`)
-  } catch (error) {
-    console.error("Error generating mock trips:", error)
-  }
-})()
+  })()
 
 // Helper function to get trips for a specific vehicle
 export async function getTripsForVehicle(vehicleId: string): Promise<TripSummary[]> {

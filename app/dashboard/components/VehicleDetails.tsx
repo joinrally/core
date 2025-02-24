@@ -64,7 +64,7 @@ export default function VehicleDetails({ vehicle }: VehicleDetailsProps) {
         <div>
           <h3 className="font-gugi text-lg font-medium mb-4 text-rally-pink">Score</h3>
           <div className="grid grid-cols-2 gap-4">
-            {["energyScore", "safetyScore", "usageScore", "total"].map((scoreType) => (
+            {["energyScore", "safetyScore", "total"].map((scoreType) => (
               <div
                 key={scoreType}
                 className={`p-4 rounded text-white ${getScoreColor(score[scoreType as keyof typeof score])}`}

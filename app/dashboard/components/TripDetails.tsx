@@ -88,7 +88,7 @@ export default function TripDetails({ trip }: TripDetailsProps) {
             <p className="text-lg font-medium mb-2">Overall Trip Score</p>
             <p className="text-5xl font-bold">{Math.round(trip.score.total)}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={`p-4 rounded text-white ${getScoreColor(trip.score.energyScore)} bg-opacity-80`}>
               <p className="text-sm font-medium">Energy Efficiency</p>
               <p className="text-xl font-bold">{Math.round(trip.score.energyScore)}</p>
@@ -96,10 +96,6 @@ export default function TripDetails({ trip }: TripDetailsProps) {
             <div className={`p-4 rounded text-white ${getScoreColor(trip.score.safetyScore)} bg-opacity-80`}>
               <p className="text-sm font-medium">Driving Safety</p>
               <p className="text-xl font-bold">{Math.round(trip.score.safetyScore)}</p>
-            </div>
-            <div className={`p-4 rounded text-white ${getScoreColor(trip.score.usageScore)} bg-opacity-80`}>
-              <p className="text-sm font-medium">Driving Efficiency</p>
-              <p className="text-xl font-bold">{Math.round(trip.score.usageScore)}</p>
             </div>
           </div>
         </div>

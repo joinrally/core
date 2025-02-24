@@ -21,7 +21,6 @@ export interface VehicleMetrics {
 export interface Score {
   energyScore: number
   safetyScore: number
-  usageScore: number
   total: number
   timestamp: string
 }

@@ -236,11 +236,10 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
               {filteredVehicles.map((vehicle) => (
                 <Card
                   key={vehicle.id}
-                  className={`flex-shrink-0 w-[200px] p-4 cursor-pointer transition-colors ${
-                    selectedVehicle?.id === vehicle.id
-                      ? "bg-gradient-to-r from-rally-pink to-rally-coral text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                  }`}
+                  className={`flex-shrink-0 w-[200px] p-4 cursor-pointer transition-colors ${selectedVehicle?.id === vehicle.id
+                    ? "bg-gradient-to-r from-rally-pink to-rally-coral text-white"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                    }`}
                   onClick={() => onSelectVehicle(vehicle)}
                 >
                   <div className="relative w-full h-[120px] bg-gray-200 dark:bg-gray-700 rounded-md flex items-center justify-center overflow-hidden">
@@ -347,8 +346,8 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                 </div>
               </div>
               <Card className="p-6">
-                <h4 className="font-gugi text-xl text-rally-pink mb-4">Vehicle Average Scores</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h4 className="font-gugi text-xl text-rally-pink mb-4">Vehicle Scores</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
                     className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.energyScore)} bg-opacity-80`}
                   >
@@ -360,12 +359,6 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                   >
                     <p className="text-sm font-medium">Safety</p>
                     <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.safetyScore)}</p>
-                  </div>
-                  <div
-                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.usageScore)} bg-opacity-80`}
-                  >
-                    <p className="text-sm font-medium">Usage Efficiency</p>
-                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.usageScore)}</p>
                   </div>
                 </div>
               </Card>
