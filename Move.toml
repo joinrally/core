@@ -1,0 +1,16 @@
+[package]
+name = "rally"
+version = "1.0.0"
+authors = []
+
+[addresses]
+rally = "0x0da2c4bb945f4b04d7308eed29e0faeda36f808f8618e690ebb786e8673136d5"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]
