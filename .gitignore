@@ -1,6 +1,3 @@
-.aptos/
-build/
-
 # dependencies
 /node_modules
 
