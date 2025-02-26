@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getTripById } from "@/lib/mockData"
+import { getTripById } from "@/lib/storage"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const tripId = params.id

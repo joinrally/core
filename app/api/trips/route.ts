@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { mockTrips } from "@/lib/mockData"
+import { mockTrips } from "@/lib/storage"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)

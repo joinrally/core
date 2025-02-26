@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getAggregatedMetricsForVehicle } from "@/lib/mockData"
+import { getAggregatedMetricsForVehicle } from "@/lib/storage"
 import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey } from "@aptos-labs/ts-sdk"
 
 // Configuration
