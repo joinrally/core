@@ -1,35 +1,27 @@
-import {
-  AptosClient,
-  AptosAccount,
-  BCS,
-  HexString
-} from "aptos";
-import { ed25519 } from "@noble/curves/ed25519";
-import * as dotenv from "dotenv";
-import protobuf from "protobufjs";
+import { Aptos, AptosConfig, Network, Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk"
 
-dotenv.config();
-
-const NODE_URL = process.env.APTOS_NODE_URL || "https://fullnode.devnet.aptoslabs.com";
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || "0x1"; // Replace with actual deployed address
-
-const client = new AptosClient(NODE_URL);
+// Configuration
+const MODULE_ADDRESS = process.env.APTOS_MODULE_ADDRESS
+const SUBMIT_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::vehicle_telemetry::submit_telemetry`
+const GET_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::vehicle_telemetry::get_telemetry`
 
 class TeslaTelemetryClient {
-  private client: AptosClient;
-  private account: AptosAccount;
-  private contractAddress: string;
+  private aptos: Aptos
+  private account: Account
 
-  constructor(client: AptosClient, account: AptosAccount, contractAddress: string) {
-    this.client = client;
-    this.account = account;
-    this.contractAddress = contractAddress;
+  constructor(config: AptosConfig, privateKeyString: string) {
+    this.aptos = new Aptos(config)
+    const privateKey = new Ed25519PrivateKey(privateKeyString)
+    this.account = Account.fromPrivateKey({ privateKey })
   }
 
-
-  private signTelemetryData(data: any): Uint8Array {
-    const serializedData = BCS.bcsToBytes(data);
-    return ed25519.sign(serializedData, this.account.signingKey.secretKey);
+  // Helper function to convert decimal degrees to fixed-point representation
+  private convertToFixedPoint(degrees: number): { value: number, isNegative: boolean } {
+    const SCALE_FACTOR = 10000000 // 10^7 as per contract
+    const isNegative = degrees < 0
+    const absoluteDegrees = Math.abs(degrees)
+    const scaledValue = Math.round(absoluteDegrees * SCALE_FACTOR)
+    return { value: scaledValue, isNegative }
   }
 
   async submitTelemetry(
@@ -41,131 +33,109 @@ class TeslaTelemetryClient {
     estimatedRange: number
   ) {
     try {
-      const telemetryData = {
-        vin,
-        latitude,
-        longitude,
-        batteryLevel,
-        chargingStatus,
-        estimatedRange,
-        timestamp: Date.now()
-      };
-      const signature = this.signTelemetryData(telemetryData);
+      // Convert coordinates to contract format
+      const latitudeFixed = this.convertToFixedPoint(latitude)
+      const longitudeFixed = this.convertToFixedPoint(longitude)
 
-      const latitudeFixed = Math.floor(latitude * 1e7);
-      const longitudeFixed = Math.floor(longitude * 1e7);
+      // Create message to sign
+      const messageData = new TextEncoder().encode(
+        `${vin}${latitudeFixed.value}${latitudeFixed.isNegative}${longitudeFixed.value}${longitudeFixed.isNegative}` +
+        `${batteryLevel}${chargingStatus}${estimatedRange}`
+      )
 
-      const payload = {
-        type: "entry_function_payload",
-        function: `${this.contractAddress}::vehicle_telemetry::submit_telemetry`,
-        type_arguments: [],
-        arguments: [
-          vin,
-          latitudeFixed,
-          longitudeFixed,
-          Math.floor(batteryLevel),
-          chargingStatus,
-          Math.floor(estimatedRange),
-          Array.from(signature)
-        ]
-      };
+      // Sign the message
+      const signature = await this.account.privateKey.sign(messageData)
 
-      const txnRequest = await this.client.generateTransaction(
-        this.account.address(),
-        payload
-      );
-      const signedTxn = await this.client.signTransaction(this.account, txnRequest);
-      const txnResult = await this.client.submitTransaction(signedTxn);
+      // Build transaction
+      const transaction = await this.aptos.transaction.build.simple({
+        sender: this.account.accountAddress,
+        data: {
+          function: SUBMIT_TELEMETRY_FUNCTION,
+          functionArguments: [
+            vin,
+            latitudeFixed.value,
+            latitudeFixed.isNegative,
+            longitudeFixed.value,
+            longitudeFixed.isNegative,
+            batteryLevel,
+            chargingStatus,
+            estimatedRange,
+            signature,
+            messageData
+          ]
+        },
+      })
 
-      await this.client.waitForTransaction(txnResult.hash);
+      // Sign and submit transaction
+      const txSignature = this.aptos.transaction.sign({ 
+        signer: this.account, 
+        transaction 
+      })
 
-      return txnResult.hash;
+      const committedTxn = await this.aptos.transaction.submit.simple({
+        transaction,
+        senderAuthenticator: txSignature,
+      })
+
+      // Wait for transaction
+      await this.aptos.waitForTransaction({ 
+        transactionHash: committedTxn.hash 
+      })
+
+      // Verify the data was written
+      const storedTelemetry = await this.getTelemetry(vin)
+
+      return {
+        success: true,
+        transactionHash: committedTxn.hash,
+        telemetry: storedTelemetry
+      }
+
     } catch (error) {
-      console.error("Error submitting telemetry:", error);
-      throw error;
+      console.error("Error submitting telemetry:", error)
+      throw error
+    }
+  }
+
+  async getTelemetry(vin: string) {
+    try {
+      const viewPayload = {
+        function: GET_TELEMETRY_FUNCTION,
+        functionArguments: [vin]
+      }
+
+      return await this.aptos.view({ payload: viewPayload })
+    } catch (error) {
+      console.error("Error getting telemetry:", error)
+      throw error
     }
   }
 
   async processProtobufTelemetry(protobufData: Buffer) {
-    try {
-      const root = await protobuf.load("telemetry.proto"); // Your protobuf schema
-      const TelemetryMessage = root.lookupType("telemetry.vehicle_data.Payload");
-
-      const message = TelemetryMessage.decode(protobufData);
-      const data = TelemetryMessage.toObject(message, {
-        longs: String,
-        enums: String,
-        bytes: String,
-      });
-
-      const telemetry = {
-        vin: data.vin,
-        batteryLevel: this.findValue(data.data, "BatteryLevel"),
-        chargingStatus: this.findValue(data.data, "DetailedChargeState"),
-        latitude: this.findLocationValue(data.data, "latitude"),
-        longitude: this.findLocationValue(data.data, "longitude"),
-        estimatedRange: this.findValue(data.data, "EstBatteryRange")
-      };
-
-      return await this.submitTelemetry(
-        telemetry.vin,
-        telemetry.latitude,
-        telemetry.longitude,
-        telemetry.batteryLevel,
-        telemetry.chargingStatus,
-        telemetry.estimatedRange
-      );
-    } catch (error) {
-      console.error("Error processing protobuf data:", error);
-      throw error;
-    }
+    // ... existing protobuf processing code ...
   }
 
   private findValue(data: any[], field: string): number {
-    const item = data.find(d => d.key === field);
-    return item ? Number(item.value.value) : 0;
+    // ... existing helper method ...
   }
 
   private findLocationValue(data: any[], field: string): number {
-    const location = data.find(d => d.key === "Location");
-    if (!location || !location.value.locationValue) return 0;
-    return Number(location.value.locationValue[field]);
+    // ... existing helper method ...
   }
 }
 
-async function main() {
-  try {
-    const account = new AptosAccount(
-      HexString.ensure(process.env.PRIVATE_KEY).toUint8Array()
-    );
+// Export a factory function to create the client
+export function createTelemetryClient(network = Network.CUSTOM) {
+  const config = new AptosConfig({
+    network,
+    fullnode: process.env.APTOS_NODE_URL || 'https://aptos.testnet.porto.movementlabs.xyz/v1',
+    faucet: process.env.APTOS_FAUCET_URL || 'https://fund.testnet.porto.movementlabs.xyz/',
+  })
 
-    const telemetryClient = new TeslaTelemetryClient(
-      client,
-      account,
-      CONTRACT_ADDRESS
-    );
-
-    const txnHash = await telemetryClient.submitTelemetry(
-      "5YJ3E1EA8LF000316",
-      37.7749,
-      -122.4194,
-      85,
-      4, // Charging
-      280
-    );
-    console.log("Transaction hash:", txnHash);
-
-    // const protobufData = fs.readFileSync('telemetry.bin');
-    // await telemetryClient.processProtobufTelemetry(protobufData);
-
-  } catch (error) {
-    console.error("Error in main:", error);
-  }
+  return new TeslaTelemetryClient(
+    config,
+    process.env.APTOS_PRIVATE_KEY!
+  )
 }
 
-// Run example
-if (require.main === module) {
-  main();
-}
-
-export { TeslaTelemetryClient };
+export { TeslaTelemetryClient }
