@@ -6,6 +6,10 @@
 
 @layer base {
   :root {
+    /* Layout */
+    --radius: 0.5rem;
+    
+    /* Core colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -33,11 +37,19 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
+  }
 
-    --radius: 0.5rem;
+  /* Base styles */
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
   }
 
   .dark {
+    /* Core colors */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
@@ -68,15 +80,7 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
+/* Sidebar animations */
 .sidebar {
   transition: all 0.3s ease-in-out;
 }
@@ -84,13 +88,3 @@
 .sidebar.open {
   transform: translateX(0);
 }
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
