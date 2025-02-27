@@ -1,8 +1,8 @@
 import type { Trip } from "../types"
-import { Card } from "@/components/ui/card"
+import { Card } from "@/src/components/ui/card"
 import { formatDistance, formatRelative } from "date-fns"
 import { Car, Battery, Coins } from "lucide-react"
-import { getScoreColor } from "@/utils/scoreColor"
+import { getScoreColor } from "@/src/utils/scoreColor"
 
 interface TripListProps {
   trips: Trip[]

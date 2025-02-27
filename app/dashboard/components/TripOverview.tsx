@@ -2,15 +2,15 @@
 
 import { useState, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card } from "@/src/components/ui/card"
+import { ScrollArea } from "@/src/components/ui/scroll-area"
+import { Label } from "@/src/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
+import { Button } from "@/src/components/ui/button"
+import { Badge } from "@/src/components/ui/badge"
 import { formatDistance, formatRelative, isWithinInterval } from "date-fns"
 import { Car, Battery, Coins, X, Filter } from "lucide-react"
-import { getScoreColor } from "@/utils/scoreColor"
+import { getScoreColor } from "@/src/utils/scoreColor"
 import type { Trip, TripSummary } from "../types"
 
 const TripDetails = dynamic(() => import("./TripDetails"), {

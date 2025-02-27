@@ -5,9 +5,9 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn } from "@/src/utils/cn"
+import { Button } from "@/src/components/ui/button"
+import { ScrollArea } from "@/src/components/ui/scroll-area"
 import { Home, Car, Route, Coins } from "lucide-react"
 
 export function Sidebar({

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { Vehicle, VehicleMetrics, Score } from "../types"
-import { getScoreColor } from "@/utils/scoreColor"
+import { getScoreColor } from "@/src/utils/scoreColor"
 
 interface VehicleDetailsProps {
   vehicle: Vehicle

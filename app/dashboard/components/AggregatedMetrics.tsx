@@ -1,5 +1,5 @@
 import type { AggregatedMetrics as AggregatedMetricsType } from "../types"
-import { Card } from "@/components/ui/card"
+import { Card } from "@/src/components/ui/card"
 import { Trophy, Battery, Route, Coins } from "lucide-react"
 
 interface AggregatedMetricsProps {

@@ -4,10 +4,10 @@ import type React from "react"
 
 import { useState } from "react"
 import { useTheme } from "next-themes"
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader } from "@/src/components/ui/card"
+import { Label } from "@/src/components/ui/label"
+import { Input } from "@/src/components/ui/input"
+import { Button } from "@/src/components/ui/button"
 
 export default function UserSettings() {
   const [user, setUser] = useState({

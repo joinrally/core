@@ -2,10 +2,10 @@
 
 import { useMemo } from "react"
 import type { Trip } from "../types"
-import { Card } from "@/components/ui/card"
+import { Card } from "@/src/components/ui/card"
 import { LineChart, Line, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatDistanceToNow, formatDistance } from "date-fns"
-import { getScoreColor } from "@/utils/scoreColor"
+import { getScoreColor } from "@/src/utils/scoreColor"
 import { Car, Battery, Route, Coins, Clock } from "lucide-react"
 
 // Commented out TripMap import

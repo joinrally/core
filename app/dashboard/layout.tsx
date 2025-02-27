@@ -4,7 +4,7 @@ import "../globals.css"
 import { Inter } from "next/font/google"
 import { Sidebar } from "./components/Sidebar"
 import { TopMenu } from "./components/TopMenu"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/src/components/theme-provider"
 import { useState, type ReactNode } from "react"
 
 const inter = Inter({ subsets: ["latin"] })

@@ -3,15 +3,15 @@
 import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-import { Card } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ScrollArea, ScrollBar } from "@/src/components/ui/scroll-area"
+import { Card } from "@/src/components/ui/card"
+import { Label } from "@/src/components/ui/label"
+import { Button } from "@/src/components/ui/button"
+import { Badge } from "@/src/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
 import { ChevronLeft, ChevronRight, Trophy, Battery, Route, Coins, X, Car, Filter } from "lucide-react"
 import type { Vehicle, AggregatedMetrics } from "../types"
-import { getScoreColor } from "@/utils/scoreColor"
+import { getScoreColor } from "@/src/utils/scoreColor"
 
 interface VehicleOverviewProps {
   vehicles: Vehicle[]
