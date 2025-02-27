@@ -11,7 +11,7 @@ import { Badge } from "@/src/components/ui/badge"
 import { formatDistance, formatRelative, isWithinInterval } from "date-fns"
 import { Car, Battery, Coins, X, Filter } from "lucide-react"
 import { getScoreColor } from "@/src/utils/scoreColor"
-import type { Trip, TripSummary } from "../types"
+import type { Trip, TripSummary } from "@/src/utils/types"
 
 const TripDetails = dynamic(() => import("./TripDetails"), {
   ssr: false,

@@ -1,4 +1,4 @@
-import RewardsChart from "../components/RewardsChart"
+import RewardsChart from "../_components/RewardsChart"
 
 export default function RewardsPage() {
   return (

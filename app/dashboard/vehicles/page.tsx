@@ -2,8 +2,8 @@
 
 import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
-import type { Vehicle, AggregatedMetrics as AggregatedMetricsType } from "../types"
-import VehicleOverview from "../components/VehicleOverview"
+import type { Vehicle, AggregatedMetrics as AggregatedMetricsType } from "@/src/utils/types"
+import VehicleOverview from "../_components/VehicleOverview"
 
 function VehiclesPageContent() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([])

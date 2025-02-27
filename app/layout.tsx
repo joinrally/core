@@ -1,4 +1,4 @@
-import "./globals.css"
+import "./_globals.css"
 import type { Metadata } from "next"
 import { Inter, Gugi } from "next/font/google"
 import type React from "react"

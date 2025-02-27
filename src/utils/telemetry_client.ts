@@ -112,15 +112,42 @@ class TeslaTelemetryClient {
   }
 
   async processProtobufTelemetry(protobufData: Buffer) {
-    // ... existing protobuf processing code ...
+    try {
+      // Assuming the protobuf data contains these fields in a structured format
+      const decodedData = JSON.parse(protobufData.toString())
+      
+      const vin = decodedData.vin || ''
+      const batteryLevel = this.findValue(decodedData.metrics, 'battery_level')
+      const chargingStatus = this.findValue(decodedData.metrics, 'charging_status')
+      const estimatedRange = this.findValue(decodedData.metrics, 'estimated_range')
+      const latitude = this.findLocationValue(decodedData.location, 'latitude')
+      const longitude = this.findLocationValue(decodedData.location, 'longitude')
+
+      // Submit the processed telemetry data
+      return await this.submitTelemetry(
+        vin,
+        latitude,
+        longitude,
+        batteryLevel,
+        chargingStatus,
+        estimatedRange
+      )
+    } catch (error) {
+      console.error("Error processing protobuf telemetry:", error)
+      throw error
+    }
   }
 
   private findValue(data: any[], field: string): number {
-    // ... existing helper method ...
+    if (!Array.isArray(data)) return 0
+    const metric = data.find(item => item.name === field)
+    return metric ? Number(metric.value) : 0
   }
 
   private findLocationValue(data: any[], field: string): number {
-    // ... existing helper method ...
+    if (!Array.isArray(data)) return 0
+    const coordinate = data.find(item => item.type === field)
+    return coordinate ? Number(coordinate.value) : 0
   }
 }
 

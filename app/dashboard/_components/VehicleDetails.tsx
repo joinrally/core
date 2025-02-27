@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { Vehicle, VehicleMetrics, Score } from "../types"
+import type { Vehicle, VehicleMetrics, Score } from "@/src/utils/types"
 import { getScoreColor } from "@/src/utils/scoreColor"
 
 interface VehicleDetailsProps {

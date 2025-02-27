@@ -1,14 +1,32 @@
 import { NextResponse } from "next/server"
 import { getTripsForVehicle } from "@/src/utils/storage"
+import { PrismaClient } from "@prisma/client"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-  const vehicleId = params.id
-  const trips = getTripsForVehicle(vehicleId)
+const prisma = new PrismaClient()
 
-  if (trips.length === 0) {
-    return NextResponse.json({ error: "No trips found for this vehicle" }, { status: 404 })
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    const trips = await prisma.trip.findMany({
+      where: {
+        vehicleId: params.id,
+      },
+      orderBy: {
+        startTime: 'desc',
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    return NextResponse.json(trips);
+  } catch (error) {
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 })
   }
-
-  return NextResponse.json(trips)
 }
 

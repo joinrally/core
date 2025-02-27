@@ -1,4 +1,4 @@
-import type { Vehicle } from "../types"
+import type { Vehicle } from "@/src/utils/types"
 
 interface FleetOverviewProps {
   vehicles: Vehicle[]

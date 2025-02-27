@@ -1,5 +1,5 @@
 import Image from "next/image"
-import type { Vehicle } from "../types"
+import type { Vehicle } from "@/src/utils/types"
 
 interface VehicleListProps {
   vehicles: Vehicle[]

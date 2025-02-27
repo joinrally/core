@@ -1,9 +1,9 @@
 "use client"
 
-import "../globals.css"
+import "../_globals.css"
 import { Inter } from "next/font/google"
-import { Sidebar } from "./components/Sidebar"
-import { TopMenu } from "./components/TopMenu"
+import { Sidebar } from "./_components/Sidebar"
+import { TopMenu } from "./_components/TopMenu"
 import { ThemeProvider } from "@/src/components/theme-provider"
 import { useState, type ReactNode } from "react"
 

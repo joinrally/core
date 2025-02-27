@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
-import type { Trip, TripSummary } from "../types"
+import type { Trip, TripSummary } from "@/src/utils/types"
 
-const TripOverview = dynamic(() => import("../components/TripOverview"), {
+const TripOverview = dynamic(() => import("../_components/TripOverview"), {
   ssr: false,
   loading: () => <div>Loading trips...</div>,
 })

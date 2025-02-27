@@ -1,4 +1,4 @@
-import type { Vehicle, Trip, VehicleMetrics, Score, TripSummary } from "@/app/dashboard/types"
+import type { Vehicle, Trip, VehicleMetrics, Score, TripSummary } from "@/src/utils/types"
 import { addMinutes, subHours } from "date-fns"
 
 // Seeded random number generator

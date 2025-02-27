@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
-import type { VehicleMetrics } from "../types"
+import type { VehicleMetrics } from "@/src/utils/types"
 import type { Map as LeafletMap } from "leaflet"
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })

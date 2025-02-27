@@ -1,4 +1,4 @@
-import type { Trip } from "../types"
+import type { Trip } from "@/src/utils/types"
 import { Card } from "@/src/components/ui/card"
 import { formatDistance, formatRelative } from "date-fns"
 import { Car, Battery, Coins } from "lucide-react"

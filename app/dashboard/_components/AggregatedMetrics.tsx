@@ -1,4 +1,4 @@
-import type { AggregatedMetrics as AggregatedMetricsType } from "../types"
+import type { AggregatedMetrics as AggregatedMetricsType } from "@/src/utils/types"
 import { Card } from "@/src/components/ui/card"
 import { Trophy, Battery, Route, Coins } from "lucide-react"
 

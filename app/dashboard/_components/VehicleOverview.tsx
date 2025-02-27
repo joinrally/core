@@ -10,7 +10,7 @@ import { Button } from "@/src/components/ui/button"
 import { Badge } from "@/src/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
 import { ChevronLeft, ChevronRight, Trophy, Battery, Route, Coins, X, Car, Filter } from "lucide-react"
-import type { Vehicle, AggregatedMetrics } from "../types"
+import type { Vehicle, AggregatedMetrics } from "@/src/utils/types"
 import { getScoreColor } from "@/src/utils/scoreColor"
 
 interface VehicleOverviewProps {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Trip } from "../types"
+import type { Trip } from "@/src/utils/types"
 import { Card } from "@/src/components/ui/card"
 import { LineChart, Line, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatDistanceToNow, formatDistance } from "date-fns"
