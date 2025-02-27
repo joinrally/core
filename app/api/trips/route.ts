@@ -1,17 +1,23 @@
 import { NextResponse } from "next/server"
-import { mockTrips } from "@/src/utils/storage"
+import { getStorageProvider } from "@/src/utils/storage"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const vin = searchParams.get("vin")
 
-  const tripSummaries = mockTrips.map((trip) => trip.summary)
-
+  const storage = getStorageProvider()
+  
   if (vin) {
-    const filteredTrips = tripSummaries.filter((trip) => trip.vehicle.vin === vin)
-    return NextResponse.json(filteredTrips)
+    const trips = await storage.getTripsForVehicle(vin)
+    return NextResponse.json(trips)
   }
 
-  return NextResponse.json(tripSummaries)
+  // For now, get all trips by getting trips for all vehicles
+  const vehicles = await storage.getVehicles()
+  const allTrips = await Promise.all(
+    vehicles.map(vehicle => storage.getTripsForVehicle(vehicle.id))
+  )
+  
+  return NextResponse.json(allTrips.flat())
 }
 

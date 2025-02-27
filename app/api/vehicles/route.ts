@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
-import { mockVehicles } from "@/src/utils/storage"
+import { getStorageProvider } from "@/src/utils/storage"
 
 export async function GET() {
-  return NextResponse.json(mockVehicles)
+  const storage = getStorageProvider()
+  const vehicles = await storage.getVehicles()
+  return NextResponse.json(vehicles)
 }
 

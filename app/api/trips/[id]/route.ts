@@ -1,13 +1,19 @@
-import { NextResponse } from "next/server"
-import { getTripById } from "@/src/utils/storage"
+import { NextResponse, NextRequest } from "next/server"
+import { getStorageProvider } from "@/src/utils/storage"
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const trip = await getTripById(id)
+    const { id } = await props.params
+    
+    if (!id) {
+      return NextResponse.json({ error: "Trip ID is required" }, { status: 400 })
+    }
+    
+    const storage = getStorageProvider()
+    const trip = await storage.getTripById(id)
 
     if (!trip) {
       return NextResponse.json({ error: "Trip not found" }, { status: 404 })

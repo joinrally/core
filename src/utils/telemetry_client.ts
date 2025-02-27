@@ -1,18 +1,23 @@
 import { Aptos, AptosConfig, Network, Account, Ed25519PrivateKey } from "@aptos-labs/ts-sdk"
 
 // Configuration
-const MODULE_ADDRESS = process.env.APTOS_MODULE_ADDRESS
-const SUBMIT_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::vehicle_telemetry::submit_telemetry`
-const GET_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::vehicle_telemetry::get_telemetry`
+const MODULE_ADDRESS = process.env.APTOS_MODULE_ADDRESS || ''
+const MODULE_NAME = 'vehicle_telemetry'
+const SUBMIT_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::${MODULE_NAME}::submit_telemetry` as const
+const GET_TELEMETRY_FUNCTION = `${MODULE_ADDRESS}::${MODULE_NAME}::get_telemetry` as const
 
 class TeslaTelemetryClient {
   private aptos: Aptos
   private account: Account
+  private privateKey: Ed25519PrivateKey
 
   constructor(config: AptosConfig, privateKeyString: string) {
+    if (!MODULE_ADDRESS) {
+      throw new Error('APTOS_MODULE_ADDRESS environment variable is not set')
+    }
     this.aptos = new Aptos(config)
-    const privateKey = new Ed25519PrivateKey(privateKeyString)
-    this.account = Account.fromPrivateKey({ privateKey })
+    this.privateKey = new Ed25519PrivateKey(privateKeyString)
+    this.account = Account.fromPrivateKey({ privateKey: this.privateKey })
   }
 
   // Helper function to convert decimal degrees to fixed-point representation
@@ -43,8 +48,8 @@ class TeslaTelemetryClient {
         `${batteryLevel}${chargingStatus}${estimatedRange}`
       )
 
-      // Sign the message
-      const signature = await this.account.privateKey.sign(messageData)
+      // Sign the message using the private key directly
+      const signature = await this.privateKey.sign(messageData).toUint8Array()
 
       // Build transaction
       const transaction = await this.aptos.transaction.build.simple({

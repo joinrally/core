@@ -16,6 +16,8 @@ export interface VehicleMetrics {
   acceleration: number
   brakePedal: number
   timestamp: string
+  latitude: number
+  longitude: number
 }
 
 export interface Score {
@@ -37,6 +39,7 @@ export interface Trip {
   energyUsed: number
   rewards: number
   isActive: boolean
+  summary: TripSummary
 }
 
 export interface TripSummary {
@@ -56,8 +59,12 @@ export interface AggregatedMetrics {
   totalDistance?: number
   totalEnergyUsed?: number
   totalRewards?: number
-  averageScore?: number
   averageSpeed?: number
   averageEnergyEfficiency?: number
+  averageScores?: {
+    energyScore: number
+    safetyScore: number
+    total: number
+  }
 }
 

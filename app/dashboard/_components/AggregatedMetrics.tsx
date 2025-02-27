@@ -16,7 +16,7 @@ export default function AggregatedMetrics({ metrics }: AggregatedMetricsProps) {
             <Trophy className="h-5 w-5 text-rally-pink" />
             <div>
               <p className="text-sm text-gray-500">Average Score</p>
-              <p className="text-xl font-bold">{metrics.averageScore.toFixed(1)}</p>
+              <p className="text-xl font-bold">{metrics.averageScores?.total.toFixed(1) || '0.0'}</p>
             </div>
           </div>
         </Card>
@@ -25,7 +25,7 @@ export default function AggregatedMetrics({ metrics }: AggregatedMetricsProps) {
             <Route className="h-5 w-5 text-rally-pink" />
             <div>
               <p className="text-sm text-gray-500">Total Distance</p>
-              <p className="text-xl font-bold">{metrics.totalDistance.toFixed(0)} mi</p>
+              <p className="text-xl font-bold">{metrics.totalDistance?.toFixed(0) || '0'} mi</p>
             </div>
           </div>
         </Card>
@@ -34,7 +34,7 @@ export default function AggregatedMetrics({ metrics }: AggregatedMetricsProps) {
             <Battery className="h-5 w-5 text-rally-pink" />
             <div>
               <p className="text-sm text-gray-500">Energy Efficiency</p>
-              <p className="text-xl font-bold">{metrics.averageEnergyEfficiency.toFixed(1)} Wh/mi</p>
+              <p className="text-xl font-bold">{metrics.averageEnergyEfficiency?.toFixed(1) || '0.0'} Wh/mi</p>
             </div>
           </div>
         </Card>
@@ -43,7 +43,7 @@ export default function AggregatedMetrics({ metrics }: AggregatedMetricsProps) {
             <Coins className="h-5 w-5 text-rally-pink" />
             <div>
               <p className="text-sm text-gray-500">Total Rewards</p>
-              <p className="text-xl font-bold">{metrics.totalRewards.toFixed(2)} $RALLY</p>
+              <p className="text-xl font-bold">{metrics.totalRewards?.toFixed(2) || '0.00'} $RALLY</p>
             </div>
           </div>
         </Card>

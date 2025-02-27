@@ -18,7 +18,7 @@ export default function DashboardLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body suppressHydrationWarning className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <div className="flex h-screen overflow-hidden">
             <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />

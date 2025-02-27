@@ -1,32 +1,43 @@
-import { NextResponse } from "next/server"
-import { getTripsForVehicle } from "@/src/utils/storage"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { NextRequest, NextResponse } from "next/server"
+import { getStorageProvider } from "@/src/utils/storage"
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const { id } = await props.params
+    const searchParams = request.nextUrl.searchParams
+    const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '10')))
+    const offset = Math.max(0, parseInt(searchParams.get('offset') || '0'))
 
-    const trips = await prisma.trip.findMany({
-      where: {
-        vehicleId: params.id,
-      },
-      orderBy: {
-        startTime: 'desc',
-      },
-      take: limit,
-      skip: offset,
-    });
+    if (!id) {
+      return NextResponse.json({ error: 'id is required' }, { status: 400 })
+    }
 
-    return NextResponse.json(trips);
+    const storage = getStorageProvider()
+    const trips = await storage.getTripsForVehicle(id)
+
+    const paginatedTrips = trips.slice(offset, offset + limit)
+
+    if (!paginatedTrips.length) {
+      return NextResponse.json({ message: 'No trips found' }, { status: 404 })
+    }
+
+    return NextResponse.json({
+      trips: paginatedTrips,
+      pagination: {
+        total: trips.length,
+        offset,
+        limit,
+        hasMore: offset + limit < trips.length
+      }
+    })
   } catch (error) {
-    return NextResponse.json({ error: "An error occurred" }, { status: 500 })
+    console.error('Error fetching trips:', error)
+    return NextResponse.json(
+      { error: "An error occurred while fetching trips" },
+      { status: 500 }
+    )
   }
 }
-

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ScrollArea, ScrollBar } from "@/src/components/ui/scroll-area"
@@ -17,11 +17,11 @@ interface VehicleOverviewProps {
   vehicles: Vehicle[]
   selectedVehicle: Vehicle | null
   onSelectVehicle: (vehicle: Vehicle) => void
+  aggregatedMetrics: AggregatedMetrics | null
 }
 
-export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVehicle }: VehicleOverviewProps) {
+export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVehicle, aggregatedMetrics }: VehicleOverviewProps) {
   const [showFilters, setShowFilters] = useState(false)
-  const [aggregatedMetrics, setAggregatedMetrics] = useState<AggregatedMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -34,24 +34,6 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
     year: searchParams.get("year")?.split(",") || [],
     vin: searchParams.get("vin")?.split(",") || [],
   }
-
-  useEffect(() => {
-    if (selectedVehicle) {
-      setIsLoading(true)
-      setError(null)
-      fetch(`/api/vehicles/${selectedVehicle.id}/metrics`)
-        .then((res) => res.json())
-        .then((data) => {
-          setAggregatedMetrics(data)
-          setIsLoading(false)
-        })
-        .catch((err) => {
-          console.error("Error fetching vehicle metrics:", err)
-          setError("Failed to load vehicle metrics")
-          setIsLoading(false)
-        })
-    }
-  }, [selectedVehicle])
 
   const filteredVehicles = vehicles.filter(
     (vehicle) =>
@@ -303,7 +285,7 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
                       <p className="text-xl font-bold dark:text-white">
-                        {aggregatedMetrics.averageScores?.total.toFixed(1)}
+                        {aggregatedMetrics.averageScores?.total.toFixed(1) || '0.0'}
                       </p>
                     </div>
                   </div>
@@ -314,7 +296,7 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Total Distance</p>
                       <p className="text-xl font-bold dark:text-white">
-                        {aggregatedMetrics.totalDistance.toFixed(0)} mi
+                        {aggregatedMetrics.totalDistance?.toFixed(0) || '0'} mi
                       </p>
                     </div>
                   </div>
@@ -325,7 +307,7 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Energy Efficiency</p>
                       <p className="text-xl font-bold dark:text-white">
-                        {aggregatedMetrics.averageEnergyEfficiency.toFixed(1)} Wh/mi
+                        {aggregatedMetrics.averageEnergyEfficiency?.toFixed(1) || '0.0'} Wh/mi
                       </p>
                     </div>
                   </div>
@@ -336,10 +318,10 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Total Rewards</p>
                       <p className="text-xl font-bold dark:text-white">
-                        {aggregatedMetrics.totalRewards.toFixed(2)} $RALLY
+                        {aggregatedMetrics.totalRewards?.toFixed(2) || '0.00'} $RALLY
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        ${(aggregatedMetrics.totalRewards * 0.1).toFixed(2)} USD
+                        ${((aggregatedMetrics.totalRewards || 0) * 0.1).toFixed(2)} USD
                       </p>
                     </div>
                   </div>
@@ -349,16 +331,20 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                 <h4 className="font-gugi text-xl text-rally-pink mb-4">Vehicle Scores</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
-                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.energyScore)} bg-opacity-80`}
+                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores?.energyScore || 0)} bg-opacity-80`}
                   >
                     <p className="text-sm font-medium">Energy Efficiency</p>
-                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.energyScore)}</p>
+                    <p className="text-xl font-bold">
+                      {Math.round(aggregatedMetrics.averageScores?.energyScore || 0)}
+                    </p>
                   </div>
                   <div
-                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores.safetyScore)} bg-opacity-80`}
+                    className={`p-4 rounded text-white ${getScoreColor(aggregatedMetrics.averageScores?.safetyScore || 0)} bg-opacity-80`}
                   >
                     <p className="text-sm font-medium">Safety</p>
-                    <p className="text-xl font-bold">{Math.round(aggregatedMetrics.averageScores.safetyScore)}</p>
+                    <p className="text-xl font-bold">
+                      {Math.round(aggregatedMetrics.averageScores?.safetyScore || 0)}
+                    </p>
                   </div>
                 </div>
               </Card>
