@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Gugi } from "next/font/google"
 import type React from "react"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] })
 const gugi = Gugi({
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body suppressHydrationWarning className={`${inter.className} ${gugi.variable}`}>
         {children}
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   )
