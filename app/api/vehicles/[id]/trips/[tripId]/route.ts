@@ -6,12 +6,12 @@ export async function GET(
   props: { params: Promise<{ id: string; tripId: string }> }
 ) {
   try {
-    const { id: vehicleId, tripId } = await props.params
+    const { id: vehicleVin, tripId } = await props.params
     
     const storage = getStorageProvider()
     const trip = await storage.getTripById(tripId)
 
-    if (!trip || trip.vehicleId !== vehicleId) {
+    if (!trip || trip.vehicleVin !== vehicleVin) {
       return NextResponse.json(
         { error: 'Trip not found' },
         { status: 404 }

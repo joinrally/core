@@ -35,7 +35,7 @@ function VehiclesPageContent() {
     // Fetch aggregated metrics for selected vehicle
     const fetchAggregatedMetrics = async () => {
       try {
-        const response = await fetch(`/api/vehicles/${selectedVehicle.id}/metrics`)
+        const response = await fetch(`/api/vehicles/${selectedVehicle.vin}/metrics`)
         const data = await response.json()
         setAggregatedMetrics(data)
       } catch (error) {

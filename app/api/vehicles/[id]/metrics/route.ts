@@ -7,10 +7,10 @@ export async function GET(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await props.params
+    const { id } = await props.params // The id parameter is now the VIN
 
     if (!id) {
-      return NextResponse.json({ error: 'Vehicle ID is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Vehicle VIN is required' }, { status: 400 })
     }
 
     // Try to get telemetry from blockchain, but don't let initialization errors block the request

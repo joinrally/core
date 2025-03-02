@@ -6,13 +6,13 @@ export async function GET(
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await props.params
+    const { id } = await props.params // Using VIN as identifier
     const searchParams = request.nextUrl.searchParams
     const limit = Math.max(1, Math.min(100, parseInt(searchParams.get('limit') || '10')))
     const offset = Math.max(0, parseInt(searchParams.get('offset') || '0'))
 
     if (!id) {
-      return NextResponse.json({ error: 'id is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Vehicle VIN is required' }, { status: 400 })
     }
 
     const storage = getStorageProvider()
@@ -20,8 +20,9 @@ export async function GET(
 
     const paginatedTrips = trips.slice(offset, offset + limit)
 
+    // Return empty array instead of 404 when no trips are found
     if (!paginatedTrips.length) {
-      return NextResponse.json({ message: 'No trips found' }, { status: 404 })
+      return NextResponse.json({ trips: [], pagination: { total: 0, offset, limit, hasMore: false } })
     }
 
     return NextResponse.json({

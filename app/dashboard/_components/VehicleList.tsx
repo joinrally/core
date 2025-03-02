@@ -14,9 +14,9 @@ export default function VehicleList({ vehicles, selectedVehicle, onSelectVehicle
       <ul className="space-y-4">
         {vehicles.map((vehicle) => (
           <li
-            key={vehicle.id}
+            key={vehicle.vin}
             className={`p-4 cursor-pointer rounded transition-colors flex items-center ${
-              selectedVehicle?.id === vehicle.id
+              selectedVehicle?.vin === vehicle.vin
                 ? "bg-gradient-to-r from-rally-pink to-rally-coral text-white"
                 : "hover:bg-gray-100"
             }`}

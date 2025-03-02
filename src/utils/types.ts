@@ -1,10 +1,10 @@
 export interface Vehicle {
-  id: string
+  // VIN is the primary identifier for vehicles
+  vin: string
   name: string
   make: string
   model: string
   year: number
-  vin: string
   image: string
   score?: Score
 }
@@ -27,9 +27,21 @@ export interface Score {
   timestamp: string
 }
 
+export interface GeoPoint {
+  latitude: number
+  longitude: number
+}
+
+export interface RouteInfo {
+  startLocation?: GeoPoint
+  endLocation?: GeoPoint
+  waypoints?: GeoPoint[]
+  polyline?: string // Encoded polyline for the route
+}
+
 export interface Trip {
   id: string
-  vehicleId: string
+  vehicleVin: string
   vehicle: Vehicle
   startTime: string
   endTime: string
@@ -40,11 +52,14 @@ export interface Trip {
   rewards: number
   isActive: boolean
   summary: TripSummary
+  tags?: string[] // Optional tags for categorizing trips
+  route?: RouteInfo // Optional route information
+  purpose?: string // Optional trip purpose
 }
 
 export interface TripSummary {
   id: string
-  vehicleId: string
+  vehicleVin: string
   vehicle: Vehicle
   startTime: string
   endTime: string
@@ -52,6 +67,9 @@ export interface TripSummary {
   estimatedEnergyUsed: number
   estimatedScore: number
   estimatedRewards: number
+  tags?: string[] // Optional tags for categorizing trips
+  route?: RouteInfo // Optional route information
+  purpose?: string // Optional trip purpose
 }
 
 export interface AggregatedMetrics {
@@ -66,5 +84,6 @@ export interface AggregatedMetrics {
     safetyScore: number
     total: number
   }
+  vehicleVin?: string
 }
 

@@ -20,7 +20,7 @@ export default function VehicleDetails({ vehicle }: VehicleDetailsProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/vehicles/${vehicle.id}/metrics`)
+        const response = await fetch(`/api/vehicles/${vehicle.vin}/metrics`)
         if (!response.ok) {
           throw new Error('Failed to fetch vehicle metrics')
         }
@@ -58,14 +58,14 @@ export default function VehicleDetails({ vehicle }: VehicleDetailsProps) {
     const interval = setInterval(fetchData, 5000) // Fetch every 5 seconds
 
     return () => clearInterval(interval)
-  }, [vehicle.id])
+  }, [vehicle.vin])
 
   if (!metrics || !score) {
     return <div>Loading...</div>
   }
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
+    <div className="bg-card shadow rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-gugi text-2xl font-semibold text-rally-coral">{vehicle.name}</h2>
       </div>
@@ -73,20 +73,20 @@ export default function VehicleDetails({ vehicle }: VehicleDetailsProps) {
         <div>
           <h3 className="font-gugi text-lg font-medium mb-4 text-rally-pink">Real-time Metrics</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-100 rounded">
-              <p className="text-sm text-gray-500">Speed</p>
+            <div className="p-4 bg-muted rounded">
+              <p className="text-sm text-muted-foreground">Speed</p>
               <p className="text-xl font-bold">{metrics.speed.toFixed(1)} mph</p>
             </div>
-            <div className="p-4 bg-gray-100 rounded">
-              <p className="text-sm text-gray-500">Pack Voltage</p>
+            <div className="p-4 bg-muted rounded">
+              <p className="text-sm text-muted-foreground">Pack Voltage</p>
               <p className="text-xl font-bold">{metrics.packVoltage.toFixed(1)} V</p>
             </div>
-            <div className="p-4 bg-gray-100 rounded">
-              <p className="text-sm text-gray-500">Pack Current</p>
+            <div className="p-4 bg-muted rounded">
+              <p className="text-sm text-muted-foreground">Pack Current</p>
               <p className="text-xl font-bold">{metrics.packCurrent.toFixed(1)} A</p>
             </div>
-            <div className="p-4 bg-gray-100 rounded">
-              <p className="text-sm text-gray-500">Acceleration</p>
+            <div className="p-4 bg-muted rounded">
+              <p className="text-sm text-muted-foreground">Acceleration</p>
               <p className="text-xl font-bold">{metrics.acceleration.toFixed(2)} g</p>
             </div>
           </div>

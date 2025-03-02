@@ -4,31 +4,75 @@ import { useState, useEffect } from "react"
 import { Card } from "@/src/components/ui/card"
 import { Button } from "@/src/components/ui/button"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { subDays, format } from "date-fns"
+import { subDays, format, addDays } from "date-fns"
+import { Loader2 } from "lucide-react"
 
 interface RewardsData {
   date: string
   amount: number
 }
 
+interface RewardsResponse {
+  rewards: Array<{ vehicleVin: string; rewards: number }>
+  totalRewards: number
+}
+
 export default function RewardsChart() {
   const [rewardsData, setRewardsData] = useState<RewardsData[]>([])
   const [currentPeriod, setCurrentPeriod] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    // In a real application, you would fetch this data from an API
-    const generateMockData = () => {
-      const data: RewardsData[] = []
+  const fetchRewardsData = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      // Calculate the date range for the current period
+      const endDate = subDays(new Date(), currentPeriod * 7)
+      const startDate = subDays(endDate, 6)
+      
+      // Format dates for API call
+      const startTime = startDate.toISOString()
+      const endTime = addDays(endDate, 1).toISOString() // Include the entire end day
+      
+      // Fetch rewards data from API
+      const response = await fetch(`/api/rewards?startTime=${startTime}&endTime=${endTime}`)
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+      
+      const data: RewardsResponse = await response.json()
+      
+      // Process the data for the chart
+      const dailyRewards: RewardsData[] = []
+      
+      // Create a data point for each day in the period
       for (let i = 6; i >= 0; i--) {
-        data.push({
-          date: format(subDays(new Date(), i + currentPeriod * 7), "MMM dd"),
-          amount: Math.floor(Math.random() * 100) + 50,
+        const day = subDays(endDate, i)
+        const dayFormatted = format(day, 'yyyy-MM-dd')
+        
+        // For now, evenly distribute the total rewards across the days
+        // In a real implementation, you'd have daily data from the API
+        dailyRewards.push({
+          date: format(day, "MMM dd"),
+          amount: Math.round(data.totalRewards / 7 * 10) / 10, // Simple distribution with one decimal place
         })
       }
-      setRewardsData(data)
+      
+      setRewardsData(dailyRewards)
+    } catch (err) {
+      console.error('Error fetching rewards:', err)
+      setError(`Failed to load rewards data: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setRewardsData([])
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    generateMockData()
+  useEffect(() => {
+    fetchRewardsData()
   }, [currentPeriod])
 
   const handlePeriodChange = (direction: "prev" | "next") => {
@@ -53,40 +97,72 @@ export default function RewardsChart() {
           Next 7 days
         </Button>
       </div>
-      <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={rewardsData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis yAxisId="left" />
-            <YAxis yAxisId="right" orientation="right" />
-            <Tooltip
-              formatter={(value: number, name: string) => [
-                `${value.toFixed(2)} $RALLY ($${(value * 0.1).toFixed(2)} USD)`,
-                name,
-              ]}
-            />
-            <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="amount"
-              name="$RALLY"
-              stroke="#FF69B4"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-            />
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey={(data) => data.amount * 0.1}
-              name="USD"
-              stroke="#FF7F50"
-              strokeWidth={2}
-              dot={{ r: 4 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      
+      {isLoading ? (
+        <div className="h-[300px] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-rally-coral" />
+          <span className="ml-2">Loading rewards data...</span>
+        </div>
+      ) : error ? (
+        <div className="h-[300px] flex items-center justify-center text-red-500">
+          {error}
+        </div>
+      ) : (
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={rewardsData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" opacity={0.4} />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fill: 'var(--foreground)' }} 
+                axisLine={{ stroke: 'var(--muted-foreground)' }} 
+              />
+              <YAxis 
+                yAxisId="left" 
+                tick={{ fill: 'var(--foreground)' }} 
+                axisLine={{ stroke: 'var(--muted-foreground)' }} 
+              />
+              <YAxis 
+                yAxisId="right" 
+                orientation="right" 
+                tick={{ fill: 'var(--foreground)' }} 
+                axisLine={{ stroke: 'var(--muted-foreground)' }} 
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'var(--tooltip-bg)',
+                  color: 'var(--tooltip-fg)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--tooltip-border)',
+                }}
+                formatter={(value: number, name: string) => [
+                  `${value.toFixed(2)} $RALLY ($${(value * 0.1).toFixed(2)} USD)`,
+                  name,
+                ]}
+              />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="amount"
+                name="$RALLY"
+                stroke="#FF69B4"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+              />
+              <Line
+                yAxisId="right"
+                type="monotone"
+                dataKey={(data) => data.amount * 0.1}
+                name="USD"
+                stroke="#FF7F50"
+                strokeWidth={2}
+                dot={{ r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      
       <div className="mt-4 text-center">
         <p className="text-lg font-semibold">
           Total Rewards: {totalRewards.toFixed(2)} $RALLY (${totalUSD.toFixed(2)} USD)

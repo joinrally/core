@@ -34,6 +34,8 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
     model: [] as string[],
     year: [] as string[],
     vin: [] as string[],
+    tags: [] as string[],
+    purpose: "" as string
   })
 
   const sortedTrips = [...trips].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
@@ -43,13 +45,23 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
     const startDate = filters.startDate ? new Date(filters.startDate) : null
     const endDate = filters.endDate ? new Date(filters.endDate) : null
 
+    // Check if trip has tags that match any of the filter tags
+    const hasMatchingTags = filters.tags.length === 0 || 
+      (trip.tags && trip.tags.some(tag => filters.tags.includes(tag)))
+
+    // Check if trip purpose matches the filter purpose
+    const hasMatchingPurpose = !filters.purpose || 
+      (trip.purpose && trip.purpose === filters.purpose)
+
     return (
       (!startDate || !endDate || isWithinInterval(tripDate, { start: startDate, end: endDate })) &&
       (filters.make.length === 0 || (trip.vehicle && filters.make.includes(trip.vehicle.make))) &&
       (filters.model.length === 0 || (trip.vehicle && filters.model.includes(trip.vehicle.model))) &&
       (filters.year.length === 0 || (trip.vehicle && filters.year.includes(trip.vehicle.year.toString()))) &&
       (filters.vin.length === 0 || (trip.vehicle && filters.vin.includes(trip.vehicle.vin))) &&
-      (!vin || (trip.vehicle && trip.vehicle.vin === vin))
+      (!vin || (trip.vehicle && trip.vehicle.vin === vin)) &&
+      hasMatchingTags &&
+      hasMatchingPurpose
     )
   })
 
@@ -194,6 +206,36 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="tags">Tags</Label>
+              <Select value={filters.tags.join(",")} onValueChange={(value) => handleFilterChange("tags", value)}>
+                <SelectTrigger id="tags">
+                  <SelectValue placeholder="Select Tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from(new Set(trips.flatMap(trip => trip.tags || []))).map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="purpose">Purpose</Label>
+              <Select value={filters.purpose} onValueChange={(value) => handleFilterChange("purpose", value)}>
+                <SelectTrigger id="purpose">
+                  <SelectValue placeholder="Select Purpose" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from(new Set(trips.map(trip => trip.purpose).filter(Boolean) as string[])).map((purpose) => (
+                    <SelectItem key={purpose} value={purpose}>
+                      {purpose}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
         <div className="mb-4 flex flex-wrap gap-2">
@@ -269,6 +311,11 @@ export default function TripOverview({ trips = [], selectedTrip, onSelectTrip, v
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">${(trip.estimatedRewards * 0.1).toFixed(2)} USD</p>
+                <div className="mt-3 flex justify-end">
+                  <a href={`/dashboard/trips/${trip.id}`} className="text-rally-coral hover:text-rally-pink text-sm font-medium">
+                    View Trip Details →
+                  </a>
+                </div>
               </Card>
             ))}
           </div>

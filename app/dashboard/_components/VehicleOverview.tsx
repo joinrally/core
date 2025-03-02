@@ -217,8 +217,8 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
             <div ref={scrollContainerRef} className="flex space-x-4 p-4">
               {filteredVehicles.map((vehicle) => (
                 <Card
-                  key={vehicle.id}
-                  className={`flex-shrink-0 w-[200px] p-4 cursor-pointer transition-colors ${selectedVehicle?.id === vehicle.id
+                  key={vehicle.vin}
+                  className={`flex-shrink-0 w-[200px] p-4 cursor-pointer transition-colors ${selectedVehicle?.vin === vehicle.vin
                     ? "bg-gradient-to-r from-rally-pink to-rally-coral text-white"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700 dark:bg-gray-800 dark:text-gray-300"
                     }`}
@@ -252,6 +252,15 @@ export default function VehicleOverview({ vehicles, selectedVehicle, onSelectVeh
                   </p>
                   <p className="text-sm opacity-75">Year: {vehicle.year}</p>
                   <p className="text-sm opacity-75">VIN: {vehicle.vin}</p>
+                  <div className="mt-2 pt-2 border-t">
+                    <a 
+                      href={`/dashboard/vehicles/${vehicle.vin}`}
+                      className={`text-sm font-medium flex justify-end ${selectedVehicle?.vin === vehicle.vin ? 'text-white' : 'text-rally-coral hover:text-rally-pink'}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      View Details →
+                    </a>
+                  </div>
                 </Card>
               ))}
             </div>

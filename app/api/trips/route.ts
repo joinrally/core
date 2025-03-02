@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   // For now, get all trips by getting trips for all vehicles
   const vehicles = await storage.getVehicles()
   const allTrips = await Promise.all(
-    vehicles.map(vehicle => storage.getTripsForVehicle(vehicle.id))
+    vehicles.map(vehicle => storage.getTripsForVehicle(vehicle.vin))
   )
   
   return NextResponse.json(allTrips.flat())
